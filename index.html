@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Neural TTS based Online Data Augmentation for Improved Speech Separation</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="TODO: title">
+<meta property="og:locale" content="en_US">
+<link rel="canonical" href="https://leiyi420.github.io/CSEmoTransfer">
+<meta property="og:url" content="https://leiyi420.github.io/CSEmoTransfer">
+<meta name="twitter:card" content="summary">
+<!-- End Jekyll SEO tag -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body data-new-gr-c-s-check-loaded="14.1001.0" data-gr-ext-installed="">
+    <section class="page-header">
+    <h2 class="project-name">Neural TTS based Online Data Augmentation for Improved Speech Separation</h2>
+    <br>
+    <h2 class="project-tagline">
+      <center> Kai Wang<sup>1,3</sup>, Shijie Lai<sup>1,3</sup>, Lili yin<sup>1,3</sup>, Hao Huang<sup>1,3</sup> and Sheng Li<sup>2</sup>  </center> 
+      <br>
+      <center> <sup>1</sup>School of computer science and technology, Engineering, Xinjiang University, Urumqi, China </center>
+      <center> <sup>2</sup>2National Institute of Information and Communications Technology (NICT), Kyoto, Japan</center>
+      <center> <sup>3</sup>Xinjiang Provincal Key Laboratory of Multi-lingual Information Technology, Urumqi, China </center>
+    </h2>
+    </section>
+
+<section class="main-content">
+
+<h2>0. Contents</h2>
+<ul>
+  <li><a href="#abstract">Abstract</a></li>
+  <li><a href="#Harmonic_and_Inharmonic_Speech">Harmonic and Inharmonic Speech</a></li>
+  <li><a href='#Speaker_Generation'>Speaker Generation</a></li>
+  <li><a href="#Parameter_Manipulation">Parameter Manipulation</a></li>
+  <ul>
+  		<li><a href="#Pitch_Manipulation">Pitch Manipulation</a></li>
+	 	<li><a href="#Duration_Manipulation">Duratin Manipulation</a></li>
+	 	<li><a href="#Energy_Manipulation">Energy Manipulation</a></li>
+  </ul>
+  <li><a href="#Utterance_Generation">Utterance Generation</a></li>
+  <li><a href="#Separation_Demo">Separation Demo</a></li>
+</ul>
+
+<br>
+<h2 id="abstract">1. Abstract<a name="abstract"></a></h2>
+<p> 
+Text-to-speech (TTS) synthetic data augmentation has been widely used in speech processing tasks, but its effectiveness in speech separation tasks remains understudied. In our previous work, we have proposed SpeakerAugment (SA) to enhance speaker diversity for generalizable speech separation by leveraging a traditional glottal vocoder to manipulate speaker parameters. In this paper, we present an evolved approach, SpeakerAugment+ (SA+), which incorporates neural TTS for online data augmentation. SA+ consists of three modules: speaker module, acoustic module and vocoder. The speaker module learns a GMM to model the distribution over speaker embeddings. The acoustic module conditions mel-spectrogram synthesis using speaker embeddings. The vocoder then converts mel-spectrograms into waveform signals. SA+ employs three augmentation techniques: speaker generation, which generates speaker embeddings by sampling on the GMM; parameter manipulation, which randomly modifies control factors of pitch, energy, and duration in the acoustic module; and utterance generation, which employs additional plain text for synthesis. Our empirical findings suggest that strict harmonicity is not a prerequisite for speech separation, as inharmonic speech synthesized by neural vocoders can serve as augmented data to improve separation performance. SA+ yields an average SI-SNRi improvement of 1.3 dB on the WSJ0-2mix dataset. In the inter-corpus testings, it demonstrates remarkable improvements of 3.3 dB and 7.1 dB in average SI-SNRi for the Libri-2mix and TIMIT-2mix test sets, respectively. Notably, in the more extensive LibriSpeech-based dataset, featuring a broader range of speakers and utterances, 
+SA+ can still significantly enhanced the average SI-SNRi and the model′s generalization capabilities.
+</p>
+<center><img src='myfig/model.jpg'></center>
+<p style="text-align: justify; font-size:16px;font-color:#D5CFCF;margin-left: 20px;margin-right:20px ;margin-top: 10px;">Fig1:  The architecture of SpeakerAugment+ (SA+). The speaker module learns the GMM distribution over speaker embeddings from the training data, with unseen speaker embeddings sampled during inference. The acoustic module uses speaker embeddings to condition the synthesis of mel spectrograms. This allows pitch, energy and duration to be manipulated via the variance adaptor, thereby increasing speaker diversity. The vocoder is responsible for estimating waveform signals based on corresponding mel-spectrograms and selectively generating both harmonic and inharmonic speech. HiFi-GAN is used for inharmonic speech, while NHV-GAN is used for harmonic speech.</p>
+
+
+<!--<br><br>-->
+
+<h2> 2. Harmonic and Inharmonic Speech<a name="Harmonic_and_Inharmonic_Speech"></a></h2>
+<p>
+Compare the perceptual quality of inharmonic and harmonic speech in SA+. The inharmonic speech is generated with HiFi-GAN, while the harmonic speech is generated with NHV-GAN.<br />
+<a href="#CREPE">CREPE<sup>[1]</sup></a>: The pitch is extracted from speech waveforms synthesized using the HiFi-GAN. <br />
+<a href="#RMVPE">RMVPE<sup>[2]</sup></a>: The pitch is extracted using RMVPE from estimated mel-spectragrams in SA+.
+</p>
+<table>
+	<tbody>
+		<tr>
+            <td style="text-align: left" colspan=4>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Inharmonic</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row1_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row1_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row1_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>2. Cray is interested in right now selling its stripped down high speed big memory racing machines</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Inharmonic</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row2_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row2_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row2_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>3. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Inharmonic</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ RMVPE</strong></th>
+	    </tr>
+	    <tr>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row3_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row3_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row3_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row3_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>4. In the past decade, COMMA U. S. air travel has nearly doubled, COMMA to more than four hundred fifty million passengers a year. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Inharmonic</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>Harmonic w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row4_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row4_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row4_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 Harmonic and Inharmonic Speech/Row4_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+	
+	</tbody>
+</table>
+
+<h2> 3. Speaker Generation<a name="Speaker_Generation"></a></h2>
+<p>
+Compare different speaker generation techniques in SA+. GMM: the speaker embedding is sampled on the learned GMM. Unit Hypersphere: the speaker embedding is sampled on the unit hypersphere.
+</p>
+<table>
+	<tbody>
+		<tr>
+            <td style="text-align: left" colspan=3>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row1_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row1_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>2. Cray is interested in right now selling its stripped down high speed big memory racing machines</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row2_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row2_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>3. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row3_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row3_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row3_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>4. In the past decade, COMMA U. S. air travel has nearly doubled, COMMA to more than four hundred fifty million passengers a year. PERIOD</td>      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row4_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row4_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 Speaker Generation/Row4_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+<h2> 4. Parameter Manipulation<a name="Parameter_Manipulation"></a></h2>
+<p>
+	Compare different control factors of pitch, energy, and duration in the acoustic module of SA+.
+</p>
+<h3>4.1 Pitch Manipulation<a name="Pitch_Manipulation"></a></h3>
+<table> 
+  	<tbody>
+  		<tr>
+            <td style="text-align: left" colspan=4>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row1_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row1_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row1_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>2. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Pitch Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row2_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row2_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/1_Pitch_Row2_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>4.2 Duration Manipulation<a name="Duration_Manipulation"></a></h3>
+<table> 
+  	<tbody>
+  		<tr>
+            <td style="text-align: left" colspan=4>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row1_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row1_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row1_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>2. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Duration Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row2_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row2_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/2_Duration_Row2_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>4.3 Energy Manipulation<a name="Energy_Manipulation"></a></h3>
+<table> 
+  	<tbody>
+  		<tr>
+            <td style="text-align: left" colspan=4>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row1_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row1_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row1_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>2. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr>  
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=0.7</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=1.0</strong></th>
+	        <th style="text-align: center"><strong>Energy Factor=1.3</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row2_0.7.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row2_1.0.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Parameter Manipulation/3_Energy_Row2_1.3.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+
+<h2> 5. Utterance Generation<a name="Utterance_Generation"></a></h2>
+<p>
+	The TTS model of SA+ is trained on WSJ0, while the text is from LibriSpeech.
+</p>
+<table>
+  	<tbody>
+  		<tr>
+            <td style="text-align: left" colspan=2>1. The tradition of carriage-loads of maskers runs back to the most ancient days of the monarchy.</td>
+      	</tr>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Sythesized</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row1_Ground_Truth.wav" style="width: 70%;" controls="" preload=""></audio></td>
+	        <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row1_Synthesized.wav" style="width: 70%;" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+            <td style="text-align: left" colspan=2>2. She sang, she laughed, she was unspeakably happy.</td>
+      	</tr>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Sythesized</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row2_Ground_Truth.wav" style="width: 70%;" controls="" preload=""></audio></td>
+	        <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row2_Synthesized.wav" style="width: 70%;" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+            <td style="text-align: left" colspan=2>3. Fetnah would have proceeded, but the syndic of the jewellers coming in interrupted her: "Madam," said he to her, "I come from seeing a very moving object, it is a young man, whom a camel- driver had just carried to an hospital: he was bound with cords on a camel, because he had not strength enough to sit.</td>
+      	</tr>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Sythesized</strong></th>
+      	</tr>
+		<tr>
+			<td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row3_Ground_Truth.wav" style="width: 70%;" controls="" preload=""></audio></td>
+	        <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row3_Synthesized.wav" style="width: 70%;" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+            <td style="text-align: left" colspan=2>4. Then she took him by the hand, and went into the temple and prayed, and came down again with Theseus to her home.</td>
+      	</tr>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Sythesized</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row4_Ground_Truth.wav" style="width: 70%;" controls="" preload=""></audio></td>
+	        <td style="text-align: center"><audio src="mysamples/5 Utterance Generation/Row4_Synthesized.wav" style="width: 70%;" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+<h2> 6. Separation Demo<a name="Separation_Demo"></a></h2>
+<p>Separated speech using separation models trained with and without SA+.</p>
+<table> 
+  	<tbody>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/6 Separation Demo/1 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/1 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>     
+	      	<th style="text-align: center"><strong>Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/6 Separation Demo/2 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/6 Separation Demo/2 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+  <br>
+  <hr>
+  <p style="font-size:16px;font-color:#D5CFCF;">
+  	<a name="CREPE">
+  		[1] J. W. Kim, J. Salamon, P. Li, and J. P. Bello, “Crepe: A convolutional representation for pitch estimation,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process. (ICASSP), 2018, pp. 161–165.
+  	</a>
+  	<br />
+	<a name="RMVPE">
+		[2] Haojie Wei, Xueke Cao, Tangpeng Dan, and Yueguo Chen, “Rmvpe: A robust model for vocal pitch estimation in polyphonic music,” arXiv preprint arXiv:2306.15412, 2023.
+	</a>
+  </p>
+  <hr>
+      <footer class="site-footer">
+            <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
+      </footer>
+    </section>
+</body></html>
+
