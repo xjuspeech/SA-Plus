@@ -61,8 +61,8 @@ SA+ can still significantly enhanced the average SI-SNRi and the model′s gener
 <h2> 2. Harmonic and Inharmonic Speech<a name="Harmonic_and_Inharmonic_Speech"></a></h2>
 <p>
 Compare the perceptual quality of inharmonic and harmonic speech in SA+. The inharmonic speech is generated with HiFi-GAN, while the harmonic speech is generated with NHV-GAN.<br />
-<a href="#CREPE">CREPE<sup>[1]</sup></a>: The pitch is extracted from speech waveforms synthesized using the HiFi-GAN. <br />
-<a href="#RMVPE">RMVPE<sup>[2]</sup></a>: The pitch is extracted using RMVPE from estimated mel-spectragrams in SA+.
+<a href="#CREPE">CREPE<sup>[1]</sup></a>: CREPE is used to extract F0 from speech waveforms synthesised by HiFi-GAN. <br />
+<a href="#RMVPE">RMVPE<sup>[2]</sup></a>: The F0 is extracted using RMVPE from estimated mel-spectragrams of the acoustic module.
 </p>
 <table>
 	<tbody>
@@ -135,7 +135,9 @@ Compare the perceptual quality of inharmonic and harmonic speech in SA+. The inh
 
 <h2> 3. Speaker Generation<a name="Speaker_Generation"></a></h2>
 <p>
-Compare different speaker generation techniques in SA+. GMM: the speaker embedding is sampled on the learned GMM. Unit Hypersphere: the speaker embedding is sampled on the unit hypersphere.
+Compare different speaker generation techniques in SA+. 
+GMM: the speaker embedding is sampled from the learned GMM. 
+Unit Hypersphere: the speaker embedding is sampled from the unit hypersphere.
 </p>
 <table>
 	<tbody>
