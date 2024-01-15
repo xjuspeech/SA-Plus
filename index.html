@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Neural TTS based Online Data Augmentation for Improved Speech Separation</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="TODO: title">
+<meta property="og:locale" content="en_US">
+<link rel="canonical" href="https://leiyi420.github.io/CSEmoTransfer">
+<meta property="og:url" content="https://leiyi420.github.io/CSEmoTransfer">
+<meta name="twitter:card" content="summary">
+<!-- End Jekyll SEO tag -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body data-new-gr-c-s-check-loaded="14.1001.0" data-gr-ext-installed="">
+    <section class="page-header">
+    <h2 class="project-name">Neural TTS based Online Data Augmentation for Improved Speech Separation</h2>
+    <br>
+    <h2 class="project-tagline">
+      <center> Kai Wang<sup>1,3</sup>, Shijie Lai<sup>1,3</sup>, Lili yin<sup>1,3</sup>, Hao Huang<sup>1,3</sup> and Sheng Li<sup>2</sup>  </center> 
+      <br>
+      <center> <sup>1</sup>School of computer science and technology, Engineering, Xinjiang University, Urumqi, China </center>
+      <center> <sup>2</sup>2National Institute of Information and Communications Technology (NICT), Kyoto, Japan</center>
+      <center> <sup>3</sup>Xinjiang Provincal Key Laboratory of Multi-lingual Information Technology, Urumqi, China </center>
+    </h2>
+    </section>
+
+<section class="main-content">
+
+<h2>0. Contents</h2>
+<ul>
+  <li><a href="#abstract">Abstract</a></li>
+  <li><a href="#SA+">SA+</a></li>
+  <li><a href="#HiFi-GAN_and_NHV-GAN">HiFi-GAN and NHV-GAN</a></li>
+  <li><a href='#Speaker_Generation'>Speaker Generation</a></li>
+  <li><a href="#Separation_Demo">Separation Demo</a></li>
+</ul>
+
+<br>
+<h2 id="abstract">1. Abstract<a name="abstract"></a></h2>
+<p> 
+Text-to-speech (TTS) synthetic data augmentation has been widely used in various speech processing tasks, but its effectiveness in speech separation remains understudied. In this paper, we present SpeakerAugment+ (SA+), which integrates neural TTS for dynamic data augmentation in speech separation. The model of SA+ comprises three modules: speaker module, which learns a Gaussian Mixture Model (GMM) to characterize the distribution over speaker embeddings in training data and samples unseen speaker embeddings during inference; acoustic module, which conditions mel-spectrogram synthesis using speaker embeddings; vocoder, which then converts mel-spectrograms into waveforms. Previous studies show the importance of harmonicity for speech separation; therefore, we compare two types of vocoders, categorizing them based on whether harmonic components are explicitly introduced during the synthesis process. SA+ employs three augmentation techniques: speaker generation, parameter manipulation and utterance generation, enhancing speaker and utterance diversity from different perspectives. The SA+ model is pre-trained and deployed upstream of the separation model, dynamically augmenting training data. Empirical findings indicate that high-quality speech synthesized using neural TTS can serve as augmented data for improved speech separation, even in the absence of strict harmonic structure. In intra-corpus testings, SA+ yields an average SI-SNRi improvement of 1.3 dB on the WSJ0-2mix dataset. In inter-corpus testings, it demonstrates remarkable improvements of 3.3 dB and 7.1 dB in average SI-SNRi for the Libri-2mix and TIMIT-2mix test sets, respectively. Furthermore, for the Libri-2mix training set which incorporates a broader range of speakers and utterances, SA+ continues to significantly improve the separation performance and generalization ability of the model.
+</p>
+<center><img src='myfig/model.jpg'></center>
+<p style="text-align: justify; font-size:16px;font-color:#D5CFCF;margin-left: 20px;margin-right:20px ;margin-top: 10px;">
+	Fig1:  The architecture of SA+. The speaker module learns the GMM distribution over speaker embeddings from the training data, with unseen speaker embeddings sampled during inference. The acoustic module uses speaker embeddings to condition the synthesis of mel-spectrograms. This allows pitch, energy and duration to be manipulated via the variance adaptor, thereby increasing speaker diversity. The vocoder is responsible for estimating waveform signals based on corresponding mel-spectrograms. We use two candidates, namely HiFi-GAN and NHV-GAN.
+</p>
+
+
+<!--<br><br>-->
+
+<h2> 2. SA+<a name="SA+"></a></h2>
+<p>
+By inputting the same text content, SA+can synthesize speech with different speaker characteristics.
+</p>
+<table>
+	<tbody>
+		<tr>
+            <td style="text-align: left" colspan=5>1. stena a. b. a shipping concern is based in gothenburg sweden</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Synthesis1</strong></th>
+	        <th style="text-align: center"><strong>Synthesis2</strong></th>
+	        <th style="text-align: center"><strong>Synthesis3</strong></th>
+	        <th style="text-align: center"><strong>Synthesis4</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/20nc010o_gt.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 SA_Plus/20nc010o_01.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/20nc010o_02.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/20nc010o_03.wav" controls="" preload=""></audio></td>
+			<td style="text-align: left"><audio src="mysamples/2 SA_Plus/20nc010o_04.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=5>2. he asked for a thirty million dollar loan ,comma even though henderson is one of wall street's best -hyphen capitalized specialist firms .period</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Synthesis1</strong></th>
+	        <th style="text-align: center"><strong>Synthesis2</strong></th>
+	        <th style="text-align: center"><strong>Synthesis3</strong></th>
+	        <th style="text-align: center"><strong>Synthesis4</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/40io030n_gt.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 SA_Plus/40io030n_01.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/40io030n_02.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/40io030n_03.wav" controls="" preload=""></audio></td>
+			<td style="text-align: left"><audio src="mysamples/2 SA_Plus/40io030n_04.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=5>3. the miami i. n. s. office for instance stopped d- deportations of nicaraguans a year ago</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Synthesis1</strong></th>
+	        <th style="text-align: center"><strong>Synthesis2</strong></th>
+	        <th style="text-align: center"><strong>Synthesis3</strong></th>
+	        <th style="text-align: center"><strong>Synthesis4</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/01kc0205_gt.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 SA_Plus/01kc0205_01.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/01kc0205_02.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/01kc0205_03.wav" controls="" preload=""></audio></td>
+			<td style="text-align: left"><audio src="mysamples/2 SA_Plus/01kc0205_04.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=5>4. the united states undertook to defend western europe against soviet attack</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>Synthesis1</strong></th>
+	        <th style="text-align: center"><strong>Synthesis2</strong></th>
+	        <th style="text-align: center"><strong>Synthesis3</strong></th>
+	        <th style="text-align: center"><strong>Synthesis4</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/023a0112_gt.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/2 SA_Plus/023a0112_01.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/023a0112_02.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/2 SA_Plus/023a0112_03.wav" controls="" preload=""></audio></td>
+			<td style="text-align: left"><audio src="mysamples/2 SA_Plus/023a0112_04.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+	</tbody>
+</table>
+
+<h2> 3. HiFi-GAN and NHV-GAN<a name="HiFi-GAN_and_NHV-GAN"></a></h2>
+<p>
+	Compare the speech quality of HiFi-GAN and NHV-GAN in SA+. When using NHV-GAN, it is necessary to extract pitch information. 
+	<a href="#CREPE">CREPE<sup>[1]</sup></a>:The pitch is extracted from speech waveforms synthesized using the HiFi-GAN. 、
+	<a href="#RMVPE">RMVPE<sup>[2]</sup></a>: The pitch is extracted using RMVPE from estimated mel-spectragrams in SA+.
+</p>
+<table>
+	<tbody>
+		<tr>
+            <td style="text-align: left" colspan=4>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>HiFi-GAN</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row1_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row1_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row1_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>2. Cray is interested in right now selling its stripped down high speed big memory racing machines</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>HiFi-GAN</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row2_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row2_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row2_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>3. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>HiFi-GAN</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ RMVPE</strong></th>
+	    </tr>
+	    <tr>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row3_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row3_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row3_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row3_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=4>4. In the past decade, COMMA U. S. air travel has nearly doubled, COMMA to more than four hundred fifty million passengers a year. PERIOD</td>
+      	</tr>  
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>HiFi-GAN</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ CREPE</strong></th>
+	        <th style="text-align: center"><strong>NHV-GAN w/ RMVPE</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row4_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row4_HiFi-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row4_NHV-GAN.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/3 HiFi-GAN and NHV-GAN/Row4_RMVPE.wav" controls="" preload=""></audio></td>
+		</tr>
+	
+	</tbody>
+</table>
+
+<h2> 4. Speaker Generation<a name="Speaker_Generation"></a></h2>
+<p>
+Compare different speaker generation techniques in SA+. GMM: the speaker embedding is sampled on the learned GMM. Unit Hypersphere: the speaker embedding is sampled on the unit hypersphere.
+</p>
+<table>
+	<tbody>
+		<tr>
+            <td style="text-align: left" colspan=3>1. Macy's smaller size could leave Federated's officers with operating power in a combined concern. PERIOD</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row1_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row1_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row1_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>2. Cray is interested in right now selling its stripped down high speed big memory racing machines</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row2_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row2_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row2_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>3. And most of the four thousand to five thousand oilmen here for the so -HYPHEN called I. P. Week headed home in a somber mood. PERIOD</td>
+      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row3_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row3_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row3_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>
+            <td style="text-align: left" colspan=3>4. In the past decade, COMMA U. S. air travel has nearly doubled, COMMA to more than four hundred fifty million passengers a year. PERIOD</td>      	</tr> 
+    	<tr>
+	      	<th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>GMM</strong></th>
+	        <th style="text-align: center"><strong>Unit Hypersphere</strong></th>
+	    </tr>
+		<tr>
+		<tr>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row4_Ground_Truth.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row4_GMM.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/4 Speaker Generation/Row4_Unit_Hypersphere.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+
+
+<h2> 5. Separation Demo<a name="Separation_Demo"></a></h2>
+<p>Separated speech using separation models trained with and without SA+.</p>
+<table> 
+  	<tbody>
+      	<tr>     
+	      	<th style="text-align: center"><strong>Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/5 Separation Demo/1 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/1 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		
+		<tr>     
+	      	<th style="text-align: center"><strong>Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/5 Separation Demo/2 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/5 Separation Demo/2 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+	</tbody>
+</table>
+  <br>
+  <hr>
+  <p style="font-size:16px;font-color:#D5CFCF;">
+  	<a name="CREPE">
+  		[1] J. W. Kim, J. Salamon, P. Li, and J. P. Bello, “Crepe: A convolutional representation for pitch estimation,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process. (ICASSP), 2018, pp. 161–165.
+  	</a>
+  	<br />
+	<a name="RMVPE">
+		[2] Haojie Wei, Xueke Cao, Tangpeng Dan, and Yueguo Chen, “Rmvpe: A robust model for vocal pitch estimation in polyphonic music,” arXiv preprint arXiv:2306.15412, 2023.
+	</a>
+  </p>
+  <hr>
+      <footer class="site-footer">
+            <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
+      </footer>
+    </section>
+</body></html>
+
