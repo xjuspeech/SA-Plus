@@ -42,22 +42,20 @@
 
 <br>
 <h2 id="abstract">1. Abstract<a name="abstract"></a></h2>
-<p> 
+	<p>
 Text-to-speech (TTS) synthetic data augmentation has been widely used in various speech processing tasks, but its effectiveness in speech separation remains understudied. In this paper, we present SpeakerAugment+ (SA+), which integrates neural TTS for dynamic data augmentation in speech separation. The model of SA+ comprises three modules: speaker module, which learns a Gaussian Mixture Model (GMM) to characterize the distribution over speaker embeddings in training data and samples unseen speaker embeddings during inference; acoustic module, which conditions mel-spectrogram synthesis using speaker embeddings; vocoder, which then converts mel-spectrograms into waveforms. SA+ employs three augmentation techniques: speaker generation, parameter manipulation and utterance generation, enhancing speaker and utterance diversity from different perspectives. The SA+ model is pre-trained and deployed upstream of the separation model, dynamically augmenting training data. We test SA+ on various separation models and datasets. The experimental results show that applying SA+ can significantly improve the performance of speech separation, including the intra-corpus and inter-corpus testings. Additionally, our findings demonstrate that high-quality speech synthesized using neural TTS can serve as augmented data for improved speech separation, even in the absence of strict harmonic structure. Finally, we hope that this paper can provide a foundation for subsequent research on data augmentation in speech separation.
 </p>
-<center><img src='myfig/model.jpg'></center>
-<p style="text-align: justify; font-size:16px;font-color:#D5CFCF;margin-left: 20px;margin-right:20px ;margin-top: 10px;">
+	<center><img src='myfig/model.jpg'></center>
+	<p style="text-align: justify; font-size:16px;font-color:#D5CFCF;margin-left: 20px;margin-right:20px ;margin-top: 10px;">
 	Fig1:  The architecture of SA+. The speaker module learns the GMM distribution over speaker embeddings from the training data, with unseen speaker embeddings sampled during inference. The acoustic module uses speaker embeddings to condition the synthesis of mel-spectrograms. This allows pitch, energy and duration to be manipulated via the variance adaptor, thereby increasing speaker diversity. The vocoder is responsible for estimating waveform signals based on corresponding mel-spectrograms. We use HiFi-GAN as the vocoder.
-</p>
-
+	</p>
 
 <!--<br><br>-->
-
-<h2> 2. Samples<a name="samples"></a></h2>
-<p>
+	<h2> 2. Samples<a name="samples"></a></h2>
+	<p>
 We present six audio samples that are randomly synthesized using SA+ to showcase the diversity of synthesized speech. Besides, we provide the ground truth and SA samples to compare them with SA+ results.
 </p>
-<table>
+	<table>
 	<tbody>
 		<tr>
             <td style="text-align: left" colspan=8>1. For the first time in years the Republicans also captured both houses of Congress.</td>
@@ -251,6 +249,137 @@ We present six audio samples that are randomly synthesized using SA+ to showcase
 			<td style="text-align: left"><audio src="mysamples/08 405a010b/405a010b_SA+6.wav" controls="" preload=""></audio></td>
 		</tr>
 		
+	</tbody>
+</table>
+	<h2> 3. Separation Demo<a name="Separation_Demo"></a></h2>
+	<p>Separated speech using separation models trained with and without SA+.</p>
+	<table>
+  	<tbody>
+      	<tr>
+	      	<th style="text-align: center"><strong>1. Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+, SI-SNRi=8.2 dB</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+, SI-SNRi=17.6 dB</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/21 Separation Demo/1 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/1 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+
+		<tr>
+	      	<th style="text-align: center"><strong>2. Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+, SI-SNRi=4.7 dB</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+, SI-SNRi=16.4 dB</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/21 Separation Demo/2 mixture.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s1_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s1_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s2_no_sa_plus.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/21 Separation Demo/2 s2_sa_plus.wav" controls="" preload=""></audio></td>
+		</tr>
+
+		<tr>
+	      	<th style="text-align: center"><strong>3. Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+, SI-SNRi=-0.3 dB</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+, SI-SNRi=12.9 dB</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/22 Separation Demo/SI491.SX166_mix.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s1_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s1_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s2_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI491.SX166_s2_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+
+<!--		<tr>-->
+<!--	      	<th style="text-align: center"><strong>Mixture</strong></th>-->
+<!--	        <th style="text-align: center"><strong>Ground Truth</strong></th>-->
+<!--	        <th style="text-align: center"><strong>w/o SA+</strong></th>-->
+<!--	        <th style="text-align: center"><strong>w/ SA+</strong></th>-->
+<!--      	</tr>-->
+<!--		<tr>-->
+<!--            <td style="text-align: left" rowspan=2><audio src="mysamples/22 Separation Demo/SI679.SI1267_mix.wav" controls="" preload=""></audio></td>-->
+<!--	        <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s1_gt.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s1_nosa+.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s1_sa+.wav" controls="" preload=""></audio></td>-->
+<!--		</tr>-->
+<!--		<tr>-->
+<!--			<td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s2_gt.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s2_nosa+.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI679.SI1267_s2_sa+.wav" controls="" preload=""></audio></td>-->
+<!--		</tr>-->
+
+	    <tr>
+	      	<th style="text-align: center"><strong>4. Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+, SI-SNRi=9.6 dB</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+, SI-SNRi=15.9 dB</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/22 Separation Demo/SI705.SX324_mix.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s1_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s1_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s2_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI705.SX324_s2_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+
+		<tr>
+	      	<th style="text-align: center"><strong>5. Mixture</strong></th>
+	        <th style="text-align: center"><strong>Ground Truth</strong></th>
+	        <th style="text-align: center"><strong>w/o SA+, SI-SNRi=0.4 dB</strong></th>
+	        <th style="text-align: center"><strong>w/ SA+, SI-SNRi=15.4 dB</strong></th>
+      	</tr>
+		<tr>
+            <td style="text-align: left" rowspan=2><audio src="mysamples/22 Separation Demo/SI1196.SX402_mix.wav" controls="" preload=""></audio></td>
+	        <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s1_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s1_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s1_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+		<tr>
+			<td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s2_gt.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s2_nosa+.wav" controls="" preload=""></audio></td>
+            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SI1196.SX402_s2_sa+.wav" controls="" preload=""></audio></td>
+		</tr>
+
+<!--		<tr>-->
+<!--	      	<th style="text-align: center"><strong>Mixture</strong></th>-->
+<!--	        <th style="text-align: center"><strong>Ground Truth</strong></th>-->
+<!--	        <th style="text-align: center"><strong>w/o SA+</strong></th>-->
+<!--	        <th style="text-align: center"><strong>w/ SA+</strong></th>-->
+<!--      	</tr>-->
+<!--		<tr>-->
+<!--            <td style="text-align: left" rowspan=2><audio src="mysamples/22 Separation Demo/SX166.SI1389_mix.wav" controls="" preload=""></audio></td>-->
+<!--	        <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s1_gt.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s1_nosa+.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s1_sa+.wav" controls="" preload=""></audio></td>-->
+<!--		</tr>-->
+<!--		<tr>-->
+<!--			<td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s2_gt.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s2_nosa+.wav" controls="" preload=""></audio></td>-->
+<!--            <td style="text-align: left"><audio src="mysamples/22 Separation Demo/SX166.SI1389_s2_sa+.wav" controls="" preload=""></audio></td>-->
+<!--		</tr>-->
 	</tbody>
 </table>
     </section>
